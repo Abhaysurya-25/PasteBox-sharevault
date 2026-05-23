@@ -77,30 +77,29 @@ const GuestFilePreview = ({ guestFiles, updateFiles }) => {
   );
 
   return (
-    <div className="flex flex-col mt-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-[var(--primary-text)] mb-4">📁 Your Uploaded Files</h2>
-        <p className="text-sm text-[var(--primary-text)]">
-          Showing {filteredFiles?.length ?? 0} file
-          {filteredFiles?.length !== 1 && "s"}
-        </p>
+    <div className="glass-card p-6 sm:p-8 animate-fade-in">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <h2 className="text-xl font-bold text-[var(--text-color)]">Your uploaded files</h2>
+        <span className="badge bg-[var(--primary-soft)] text-[var(--primary-text)]">
+          {filteredFiles?.length ?? 0} file{filteredFiles?.length !== 1 && "s"}
+        </span>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 w-full lg:items-center mb-4">
+      <div className="flex flex-col lg:flex-row gap-3 w-full lg:items-center mb-6">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--secondary-text)]">🔍</span>
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-text)]"
+            className="input-field pl-10"
             placeholder="Search by file name"
             aria-label="Search"
           />
         </div>
 
         <select
-          className="px-3 py-2 border rounded-lg text-gray-900"
+          className="input-field w-full lg:w-auto"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
         >
@@ -113,7 +112,7 @@ const GuestFilePreview = ({ guestFiles, updateFiles }) => {
         </select>
 
         <select
-          className="px-3 py-2 border rounded-lg text-gray-900"
+          className="input-field w-full lg:w-auto"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
@@ -137,13 +136,13 @@ const GuestFilePreview = ({ guestFiles, updateFiles }) => {
       </div>
 
       {safeFiles.length === 0 ? (
-        <p className="text-gray-500">No files uploaded yet.</p>
+        <div className="empty-state">No files uploaded yet. Upload above to get started.</div>
       ) : (
         <div className="-my-2 overflow-x-auto">
           <div className="inline-block min-w-full py-2 align-middle">
-            <div className="overflow-hidden border border-[var(--border-color)] rounded-md shadow-md">
+            <div className="overflow-hidden rounded-xl border border-[var(--border-color)]">
               <table className="min-w-full divide-y divide-[var(--border-color)] text-[var(--text-color)]">
-                <thead className="bg-[var(--primary-text)] text-[var(--text-on-primary)] hidden md:table-header-group">
+                <thead className="hidden md:table-header-group bg-[var(--surface-muted)]">
                   <tr>
                     {[
                       "File Name",
@@ -210,26 +209,13 @@ const GuestFilePreview = ({ guestFiles, updateFiles }) => {
                             </span>
                           </td>
                           <td className="px-6 py-4 flex gap-2 mt-2 text-sm space-x-3">
-                            <button
-                              onClick={() => setPreviewFile(file)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 border border-blue-500 rounded hover:bg-blue-50 transition"
-                            >
+                            <button type="button" onClick={() => setPreviewFile(file)} className="btn-secondary text-xs py-1.5 px-3">
                               <FaEye /> Preview
                             </button>
-
-                            {/* Share */}
-                            <button
-                              onClick={() => setShareFile(file)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-purple-600 border border-purple-500 rounded hover:bg-purple-50 transition"
-                            >
+                            <button type="button" onClick={() => setShareFile(file)} className="btn-secondary text-xs py-1.5 px-3">
                               <FaShare /> Share
                             </button>
-
-                            {/* Delete */}
-                            <button
-                              onClick={() => deleteFile(fileKey)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 border border-red-500 rounded hover:bg-red-50 transition"
-                            >
+                            <button type="button" onClick={() => deleteFile(fileKey)} className="text-xs py-1.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition">
                               <FaTrashAlt /> Delete
                             </button>
                           </td>
@@ -302,26 +288,13 @@ const GuestFilePreview = ({ guestFiles, updateFiles }) => {
                             </div>
 
                             <div className="flex flex-wrap gap-4 mt-3">
-                             <button
-                              onClick={() => setPreviewFile(file)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 border border-blue-500 rounded hover:bg-blue-50 transition"
-                            >
+                             <button type="button" onClick={() => setPreviewFile(file)} className="btn-secondary text-xs py-1.5 px-3">
                               <FaEye /> Preview
                             </button>
-
-                            {/* Share */}
-                            <button
-                              onClick={() => setShareFile(file)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-purple-600 border border-purple-500 rounded hover:bg-purple-50 transition"
-                            >
+                            <button type="button" onClick={() => setShareFile(file)} className="btn-secondary text-xs py-1.5 px-3">
                               <FaShare /> Share
                             </button>
-
-                            {/* Delete */}
-                            <button
-                              onClick={() => deleteFile(fileKey)}
-                              className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 border border-red-500 rounded hover:bg-red-50 transition"
-                            >
+                            <button type="button" onClick={() => deleteFile(fileKey)} className="text-xs py-1.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition">
                               <FaTrashAlt /> Delete
                             </button>
                             </div>

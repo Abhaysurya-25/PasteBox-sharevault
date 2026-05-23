@@ -1,8 +1,14 @@
-# React + Vite
+# PasteBox Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the PasteBox file-sharing platform.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
+
+Set `VITE_API_BASE_URL=http://localhost:6600/api` in `.env` if the API is not on the default host.
+
+See the root [README](../README.md) for full project setup.

@@ -117,7 +117,7 @@ const GuestFileUpload = ({ guestFiles, updateFiles }) => {
   };
 
   return (
-    <div className="container bg-[var(--bg-color)] text-[var(--text-color)] p-6 rounded-lg shadow-md relative">
+    <div className="container upload-shell relative animate-fade-in">
       {loading && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10 rounded-lg">
           <div className="flex flex-col items-center gap-3 bg-white dark:bg-gray-800 px-8 py-6 rounded-lg shadow-lg">

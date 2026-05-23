@@ -16,11 +16,13 @@ export function buildShareUrl(shortUrl) {
 
 export function getShareLinks(shortUrl) {
   const fullUrl = buildShareUrl(shortUrl);
+  const text = encodeURIComponent(`Download file: ${fullUrl}`);
 
   return {
-    whatsapp: `https://wa.me/?text=${encodeURIComponent("Download file: " + fullUrl)}`,
-    email: `mailto:?subject=Shared File&body=${encodeURIComponent("Here's your file: " + fullUrl)}`,
+    whatsapp: `https://wa.me/?text=${text}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`,
+    email: `mailto:?subject=${encodeURIComponent("Shared file on PasteBox")}&body=${encodeURIComponent(`Here's your file: ${fullUrl}`)}`,
     copy: fullUrl,
-    qr: `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(fullUrl)}&size=150x150`,
+    qr: `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(fullUrl)}&size=200x200&margin=10`,
   };
 }

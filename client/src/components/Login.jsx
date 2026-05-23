@@ -1,125 +1,91 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { loginUser, registerUser } from '../redux/slice/auth/authThunk';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { loginUser } from "../redux/slice/auth/authThunk";
+import AuthLayout from "./layout/AuthLayout";
+import Spinner from "./ui/Spinner";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading } = useSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const [formData,setFormData]=useState({
-    email:'',
-    password:'',
-  })
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleChange=(e)=>{
-   setFormData({
-    ...formData,
-    [e.target.name]:e.target.value,
-   })
-  }
-
-  const handleSubmit=async (e)=>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if(!formData.email || !formData.password){
-      toast.error('Please fill all the fields');
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill all fields");
       return;
     }
-
-
-
     try {
       await dispatch(loginUser(formData)).unwrap();
-      toast.success('Login successful');
-      navigate('/dashboard', { replace: true });
+      toast.success("Welcome back!");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
-      toast.error(typeof error === 'string' ? error : 'Login failed');
+      toast.error(typeof error === "string" ? error : "Login failed");
     }
-  }
-  return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
-      <div className="m-0 sm:m-12 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
-          <div>
-            {/* <img
-              src="https://storage.googleapis.com/devitary-image-host.appspot.com/15846435184459982716-LogoMakr_7POjrN.png"
-              className="w-32 mx-auto"
-              alt="Logo"
-            /> */}
-          </div>
-          <div className="mt-12 flex flex-col items-center">
-            <h1 className="text-2xl xl:text-3xl font-extrabold">
-              Login to Paste Box 
-            </h1>
-            <div className="w-full flex-1 mt-8">
-              <div className="mx-auto max-w-xs">
-               
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="email"
-                  name="email"
-                  onChange={handleChange}
-                  value={formData.email}
-                  placeholder="Email"
-                />
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="password"
-                  name="password"
-                  onChange={handleChange}
-                  value={formData.password}
-                  placeholder="Password"
-                />
-                <button
-                  className="mt-5 tracking-wide font-semibold bg-indigo-500 text-gray-100 w-full py-4 rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
-                  <svg
-                    className="w-6 h-6 -ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="8.5" cy="7" r="4" />
-                    <path d="M20 8v6M23 11h-6" />
-                  </svg>
-                  <span className="ml-3">{loading ? "Logging..." : "Login"}</span>
-                </button>
-                <p className="mt-6 text-xs text-gray-600 text-center">
-                   Don't have an account?{' '}
-                  <a
-                    href="/signup"
-                    className="border-b border-gray-500 border-dotted text-primary hover:text-primary font-semibold"
-                  >
-                    Sign Up
-                  </a>
-                 
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+  };
 
-        {/* Right Side Image Section */}
-        <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
-          <div
-            className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
-            style={{
-              backgroundImage:
-                "url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')",
-            }}
-          ></div>
+  return (
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Sign in to manage your files and dashboard"
+      alternate={
+        <>
+          Don&apos;t have an account?{" "}
+          <Link to="/signup" className="font-semibold text-[var(--primary-text)] hover:underline">
+            Sign up free
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-color)] mb-1.5">Email</label>
+          <input
+            className="input-field"
+            type="email"
+            name="email"
+            onChange={handleChange}
+            value={formData.email}
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
         </div>
-      </div>
-    </div>
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-color)] mb-1.5">Password</label>
+          <div className="relative">
+            <input
+              className="input-field pr-12"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              onChange={handleChange}
+              value={formData.password}
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--secondary-text)] hover:text-[var(--text-color)]"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
+        <button type="submit" className="btn-primary w-full py-3" disabled={loading}>
+          {loading ? <Spinner size="sm" className="border-white border-t-transparent" /> : "Sign in"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 

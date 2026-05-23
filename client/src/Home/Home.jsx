@@ -1,9 +1,9 @@
 import React from "react";
 import { IoMdCloudUpload } from "react-icons/io";
-import { SiFsecure, SiReact, SiRedux, SiTailwindcss, SiNodedotjs, SiGithub } from "react-icons/si";
+import { SiFsecure, SiReact, SiRedux, SiTailwindcss, SiNodedotjs } from "react-icons/si";
 import { GoFileSubmodule } from "react-icons/go";
 import { TbUpload } from "react-icons/tb";
-import { FaFacebook, FaInstagram, FaLink, FaTwitter, FaShareSquare, FaLaptopCode } from "react-icons/fa";
+import { FaLink, FaShareSquare } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Home = () => {
@@ -11,7 +11,7 @@ const Home = () => {
     <div className="font-sans bg-gray-50 text-gray-800">
       {/* Header */}
       <header className="bg-gray-900 text-white text-center py-6">
-        <h1 className="text-4xl font-bold">🚀 Share Pod</h1>
+        <h1 className="text-4xl font-bold">🚀 PasteBox</h1>
         <p className="mt-2 text-lg">Fast, secure & simple file sharing solution</p>
       </header>
 
@@ -32,7 +32,7 @@ const Home = () => {
 
       {/* Features */}
       <section className="bg-gray-100 py-14 px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Choose Share Pod?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Why Choose PasteBox?</h2>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
             <IoMdCloudUpload size={60} className="mx-auto mb-4 text-blue-500" />
@@ -97,36 +97,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Developer Info */}
-      <section className="bg-white py-12 px-4 text-center">
-        <div className="max-w-3xl mx-auto">
-          <FaLaptopCode size={40} className="mx-auto text-gray-700 mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Developed By Prince Kumar</h2>
-          <p className="text-gray-600 mb-4">
-            Passionate MERN stack developer dedicated to building fast and user-friendly web experiences.
-          </p>
-          <div className="flex justify-center space-x-6">
-            <a
-              href="https://github.com/princeInScripts"
-              target="_blank"
-              className="text-gray-700 hover:text-black flex items-center space-x-2"
-            >
-              <SiGithub size={22} />
-              <span>GitHub</span>
-            </a>
-            <a
-              href="https://scriptxprince.me"
-              target="_blank"
-              className="text-blue-600 hover:underline flex items-center space-x-2"
-            >
-              <FaLink size={22} />
-              <span>Portfolio</span>
-              
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="bg-blue-600 text-white text-center py-12 px-4">
         <h2 className="text-3xl font-bold mb-4">Start Sharing Today</h2>
@@ -139,12 +109,10 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-6">
-        <p>&copy; {new Date().getFullYear()} Share Pod. All rights reserved.</p>
-        <div className="flex justify-center space-x-4 mt-2">
-          <a href="https://facebook.com" className="hover:text-blue-400"><FaFacebook size={24} /></a>
-          <a href="https://twitter.com" className="hover:text-sky-400"><FaTwitter size={24} /></a>
-          <a href="https://instagram.com" className="hover:text-pink-500"><FaInstagram size={24} /></a>
-        </div>
+        <p>&copy; {new Date().getFullYear()} PasteBox. All rights reserved.</p>
+        <p className="mt-2 text-sm text-gray-400">
+          Made with <span className="text-red-400">♥</span> by Abhay Surya
+        </p>
       </footer>
     </div>
   );

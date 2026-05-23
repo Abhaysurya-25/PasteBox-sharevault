@@ -1,140 +1,147 @@
-# 📦 PasteBox — Secure, Fast & Smart File Sharing Platform
+# PasteBox
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
-[![Tech](https://img.shields.io/badge/stack-MERN-blueviolet)]()
+A modern file-sharing platform built with the MERN stack and AWS S3. Upload files, generate short links, protect downloads with passwords, set expiry dates, and share via QR code, WhatsApp, Facebook, or email.
 
-**PasteBox** is a modern file-sharing and storage platform that lets users instantly upload files and generate short, shareable download links or QR codes. With a clean UI, lightning-fast uploads (via AWS), and optional user authentication, PasteBox is designed for both casual and power users.
+## Features
 
-Live Demo (Coming Soon) | Powered by MERN + AWS
+- **Guest uploads** — Share files without creating an account (session stored locally)
+- **User accounts** — Register, log in, and manage files from a dashboard
+- **Cloud storage** — Files stored on AWS S3 with signed preview/download URLs
+- **Security** — Optional password protection and link expiry
+- **Sharing** — Short links (`/f/…` for users, `/g/…` for guests), QR codes, social share, server-side email
+- **Analytics** — Upload and download counts on the dashboard
+- **Modern UI** — React + Tailwind CSS, light/dark mode, responsive layout
 
----
+## Tech stack
 
-## ✨ Features
+| Layer    | Technologies                                      |
+| -------- | ------------------------------------------------- |
+| Frontend | React 18, Vite, Tailwind CSS, Redux Toolkit       |
+| Backend  | Node.js, Express, MongoDB Atlas, Mongoose         |
+| Storage  | AWS S3 (SDK v3)                                   |
+| Auth     | JWT, bcrypt                                       |
+| Email    | Nodemailer (Gmail SMTP + App Password)            |
 
-### 🚀 General Features
+## Project structure
 
-- ⚡ Fast file uploads via AWS S3 & MongoDB GridFS
-- 🔐 JWT-based authentication (Login/Register)
-- 🧾 Dashboard for managing uploaded files
-- 💾 Anonymous sharing via LocalStorage
-- 🔗 Share links with QR Codes, WhatsApp, Email, Facebook, etc.
-- 📅 Expiration countdown for temporary files
-- 📤 Download/Preview features with tracking
-- 🌐 SEO-optimized public pages
-- 📈 Progress indicators, spinners, and toasts for smooth UX
+```
+pastebox-file-sharing-platform/
+├── client/          # React frontend (Vite)
+│   └── src/
+│       ├── components/
+│       ├── redux/
+│       └── config/
+└── server/          # Express API
+    └── src/
+        ├── controllers/
+        ├── models/
+        ├── routes/
+        └── config/
+```
 
----
+## Prerequisites
 
-### 📡 Sharing Options
+- Node.js 18+
+- MongoDB Atlas (or local MongoDB)
+- AWS account with S3 bucket and IAM credentials
+- Gmail account with 2-Step Verification (for App Password email sharing)
 
-- Share links via:
-  - WhatsApp
-  - Instagram
-  - Email
-  - Direct QR Code
-- Copy link with one click
+## Setup
 
-### ⚙️ Backend & Storage
-
-- Uses **AWS S3** for fast and reliable file storage
-- GridFS support for large file uploads
-- Secure token-based API authentication
-- Supports file compression and preview links
-
----
-
-## 🛠️ Tech Stack
-
-### 🔹 Frontend
-
-- **React 18**
-- **React Router DOM**
-- **Tailwind CSS** (for styling)
-- **Redux Toolkit** (for state management)
-- **React Dropzone** (for file drag-and-drop)
-- **React Toastify** (for notifications)
-- **React QR Code** & **React Share** (for QR and social sharing)
-- **Vite** (blazing fast dev server)
-
-### 🔸 Backend
-
-- **Node.js** + **Express**
-- **MongoDB** + **Mongoose**
-- **AWS SDK** (for S3 uploads)
-- **Multer** + **GridFS**
-- **JWT** (authentication)
-- **ShortID** (for short link generation)
-- **QRCode** (for QR generation)
-- **Nodemailer** (for potential email sharing)
-
----
-
-## 📸 Screenshots
-
-### 👤 User Dashboard
-
-![User Dashboard](./client/src/assets/screenshots/user_dashboard.png)
-
-### 👥 Guest Dashboard
-
-![Guest Dashboard](./client/src/assets/screenshots/dashboard.png)
-
-### 📤 File Upload Panel
-
-![File Uploaded](./client/src/assets/screenshots/upload.png)
-
-### 🔗 File Share Options
-
-![File Share](./client/src/assets/screenshots/share.png)
-
-### 🔍 File Preview Window
-
-![File Preview](./client/src/assets/screenshots/file_preview.png)
-
-## 📂 Project Structure
-
-![Project Structure](./client/src/assets/structure.png)
-
-> _The structure image above shows the separation of the React frontend (`client/`) and Node.js backend (`server/`), including components, routes, controllers, models, and config folders._
-
----
-
-## ⚙️ Installation & Running Locally
-
-### 📦 Requirements
-
-- Node.js
-- MongoDB (local or Atlas)
-- AWS credentials with S3 bucket
-
-### 🧑‍💻 1. Clone the repository
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/PrinceInScripts/Share-Pod-File-Sharing-Application
+git clone <your-repo-url>
+cd pastebox-file-sharing-platform
 
-cd client
-npm install
-npm run dev
+cd client && npm install
+cd ../server && npm install
+```
 
-cd server
-npm install
-npm start
+### 2. Server environment
 
+Copy `server/.env.sample` to `server/.env` and fill in:
 
+```env
 PORT=6600
-MONGODB_URL=your_mongo_url
-SERVER_URL=http://localhost:6600/api/files
+MONGODB_URL=your_mongodb_connection_string
 CLIENT_URL=http://localhost:5173
-NODE_ENV=development
 JWT_SECRET=your_jwt_secret
 
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret
-AWS_REGION=your_aws_region
-AWS_BUCKET_NAME=your_s3_bucket
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_REGION=your_region
+AWS_BUCKET_NAME=your_bucket
 
-MAIL_USER=your_email
-MAIL_PASS=your_email_password
+MAIL_USER=your@gmail.com
+MAIL_PASS=your_16_char_gmail_app_password
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_SECURE=false
+
+FRONTEND_URL=http://localhost:5173
 BASE_URL=http://localhost:6600
 ```
+
+For Gmail, create an [App Password](https://myaccount.google.com/apppasswords) and use it as `MAIL_PASS`.
+
+### 3. Client environment (optional)
+
+```env
+# client/.env
+VITE_API_BASE_URL=http://localhost:6600/api
+```
+
+### 4. Run locally
+
+**Terminal 1 — API**
+
+```bash
+cd server
+npm start
+```
+
+**Terminal 2 — Frontend**
+
+```bash
+cd client
+npm run dev
+```
+
+- App: http://localhost:5173  
+- API: http://localhost:6600  
+
+## Main routes
+
+| Route            | Description              |
+| ---------------- | ------------------------ |
+| `/`              | Guest upload & landing   |
+| `/login`         | Sign in                  |
+| `/signup`        | Register                 |
+| `/dashboard`     | User dashboard (auth)    |
+| `/f/:shortCode`  | Download shared user file |
+| `/g/:shortCode`  | Download shared guest file |
+
+## Scripts
+
+**Client**
+
+```bash
+npm run dev      # development
+npm run build    # production build
+npm run preview  # preview build
+```
+
+**Server**
+
+```bash
+npm start        # nodemon dev server
+```
+
+## License
+
+MIT
+
+---
+
+Made with ♥ by Abhay Surya

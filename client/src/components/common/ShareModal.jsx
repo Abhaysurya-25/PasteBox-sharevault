@@ -1,19 +1,36 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { FaWhatsapp, FaEnvelope, FaDownload, FaLink, FaPaperPlane } from "react-icons/fa";
+import {
+  FaWhatsapp,
+  FaFacebook,
+  FaEnvelope,
+  FaDownload,
+  FaLink,
+  FaPaperPlane,
+  FaCheck,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import { getShareLinks } from "../../utils/shareUrl";
 import { sendLinkEmail } from "../../redux/slice/file/fileThunk";
+import Modal from "../ui/Modal";
+
+const shareOptions = [
+  { key: "whatsapp", label: "WhatsApp", icon: FaWhatsapp, color: "text-emerald-500", bg: "hover:bg-emerald-50 dark:hover:bg-emerald-500/10" },
+  { key: "facebook", label: "Facebook", icon: FaFacebook, color: "text-blue-600", bg: "hover:bg-blue-50 dark:hover:bg-blue-500/10" },
+  { key: "email", label: "Email app", icon: FaEnvelope, color: "text-rose-500", bg: "hover:bg-rose-50 dark:hover:bg-rose-500/10", isMailto: true },
+];
 
 const ShareModal = ({ file, onClose, isGuest = false }) => {
   const dispatch = useDispatch();
   const [recipientEmail, setRecipientEmail] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!file) return null;
 
   const links = getShareLinks(file.shortUrl);
   const fileId = file._id || file.id;
+  const displayName = file.name?.length > 40 ? `${file.name.slice(0, 37)}...` : file.name;
 
   const downloadQRCode = async () => {
     try {
@@ -22,37 +39,43 @@ const ShareModal = ({ file, onClose, isGuest = false }) => {
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = "qr-code.png";
+      link.download = "pastebox-qr.png";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
+      toast.success("QR code downloaded");
     } catch {
-      toast.error("Failed to download QR code. Please try again.");
+      toast.error("Failed to download QR code");
+    }
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(links.copy);
+      setCopied(true);
+      toast.success("Link copied!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy link");
     }
   };
 
   const handleSendEmail = async () => {
     if (!recipientEmail.trim()) {
-      toast.warn("Please enter a recipient email address.");
+      toast.warn("Enter a recipient email");
       return;
     }
-
     if (!fileId) {
-      toast.error("File ID missing. Please refresh and try again.");
+      toast.error("File ID missing — refresh and try again");
       return;
     }
-
     setSendingEmail(true);
     try {
       await dispatch(
-        sendLinkEmail({
-          fileId,
-          email: recipientEmail.trim(),
-          isGuest,
-        })
+        sendLinkEmail({ fileId, email: recipientEmail.trim(), isGuest })
       ).unwrap();
-      toast.success("Share link sent by email!");
+      toast.success("Share link sent!");
       setRecipientEmail("");
     } catch (err) {
       toast.error(typeof err === "string" ? err : "Failed to send email");
@@ -62,100 +85,64 @@ const ShareModal = ({ file, onClose, isGuest = false }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-[var(--bg-color)] p-6 rounded shadow-lg w-full max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-bold mb-4 text-center text-[var(--text-color)]">
-          Share &quot;{file.name}&quot;
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[var(--text-color)]">
+    <Modal title={`Share "${displayName}"`} onClose={onClose} maxWidth="max-w-lg">
+      <div className="grid grid-cols-3 gap-3">
+        {shareOptions.map(({ key, label, icon: Icon, color, bg, isMailto }) => (
           <a
-            href={links.whatsapp}
-            target="_blank"
+            key={key}
+            href={links[key]}
+            target={isMailto ? undefined : "_blank"}
             rel="noreferrer"
-            className="flex items-center gap-3 p-4 border rounded hover:shadow transition"
+            className={`flex flex-col items-center gap-2 rounded-xl border border-[var(--border-color)] p-4 transition-all duration-200 ${bg} hover:shadow-soft hover:-translate-y-0.5`}
           >
-            <FaWhatsapp className="text-green-500 text-2xl" />
-            <span className="font-semibold">WhatsApp</span>
+            <Icon className={`text-2xl ${color}`} />
+            <span className="text-xs font-semibold text-[var(--text-color)]">{label}</span>
           </a>
+        ))}
+      </div>
 
-          <a
-            href={links.email}
-            className="flex items-center gap-3 p-4 border rounded hover:shadow transition"
-          >
-            <FaEnvelope className="text-red-500 text-2xl" />
-            <span className="font-semibold">Email (client app)</span>
-          </a>
-        </div>
-
-        <div className="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Send link by email (from your PasteBox account)
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="email"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
-              placeholder="recipient@example.com"
-              className="flex-1 px-3 py-2 border rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <button
-              type="button"
-              onClick={handleSendEmail}
-              disabled={sendingEmail}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-60"
-            >
-              <FaPaperPlane />
-              {sendingEmail ? "Sending..." : "Send"}
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Uses MAIL_USER / MAIL_PASS from server .env (Gmail App Password recommended).
-          </p>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            QR Code:
-          </p>
-          <img
-            src={links.qr}
-            alt="QR Code"
-            className="mx-auto border rounded w-32 h-32"
+      <div className="mt-6 rounded-xl border border-[var(--border-color)] bg-[var(--surface-muted)]/40 p-4">
+        <p className="text-sm font-medium text-[var(--text-color)] mb-3">Send link by email</p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="email"
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            placeholder="recipient@example.com"
+            className="input-field flex-1"
           />
-          <div className="flex flex-col items-center mt-4 gap-2">
-            <button
-              onClick={downloadQRCode}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-500 rounded hover:bg-blue-200 transition"
-            >
-              <FaDownload className="text-blue-500 text-xl" />
-              <span className="font-semibold">Download QR Code</span>
-            </button>
-
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(links.copy);
-                toast.success("Link copied to clipboard!");
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-500 rounded hover:bg-blue-200 transition"
-            >
-              <FaLink className="text-blue-500 text-xl" />
-              <span className="font-semibold">Copy Link</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 text-center">
           <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
+            type="button"
+            onClick={handleSendEmail}
+            disabled={sendingEmail}
+            className="btn-primary shrink-0"
           >
-            Close
+            <FaPaperPlane />
+            {sendingEmail ? "Sending..." : "Send"}
           </button>
         </div>
       </div>
-    </div>
+
+      <div className="mt-6 flex flex-col items-center">
+        <p className="text-sm font-medium text-[var(--text-color)] mb-3">QR Code</p>
+        <div className="rounded-2xl border-2 border-[var(--border-color)] p-4 bg-white shadow-soft">
+          <img src={links.qr} alt="QR Code" className="w-36 h-36" />
+        </div>
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
+          <button type="button" onClick={downloadQRCode} className="btn-secondary text-sm">
+            <FaDownload /> Download QR
+          </button>
+          <button type="button" onClick={handleCopy} className="btn-primary text-sm">
+            {copied ? <FaCheck /> : <FaLink />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 p-3 rounded-xl bg-[var(--surface-muted)]/50 border border-[var(--border-color)]">
+        <p className="text-xs text-[var(--secondary-text)] break-all font-mono">{links.copy}</p>
+      </div>
+    </Modal>
   );
 };
 
