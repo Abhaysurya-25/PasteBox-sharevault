@@ -25,7 +25,7 @@ useEffect(() => {
             <main className="flex-1 p-6 mt-10 max-w-screen-xl bg-[var(--primary-bg)] text-[var(--text-color)] mx-auto">
             <GuestFileUpload guestFiles={files} updateFiles={updateFiles}/>
         
-            <GuestFilePreview guestFiles={files} />
+            <GuestFilePreview guestFiles={files} updateFiles={updateFiles} />
             
             </main>
             <Footer />

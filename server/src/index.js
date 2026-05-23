@@ -1,5 +1,6 @@
 import { app } from "./app.js";
-import connectDB from "./db/index.js"
+import connectDB from "./db/index.js";
+import { logMailStartupStatus } from "./config/mail.js";
 import fileRoutes from "./routes/file.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import path from 'path';
@@ -32,6 +33,7 @@ const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
     app.listen(PORT, () => {
       console.log(`✅ Server is running at http://localhost:${PORT}`);
+      logMailStartupStatus();
     });
   } catch (error) {
     console.error("❌ Error starting server:", error);

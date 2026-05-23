@@ -34,8 +34,8 @@ router.post('/verifyFilePassword', verifyFilePassword);
 router.post('/verifyGuestFilePassword', verifyGuestFilePassword);
 
 router.get('/getUserFiles/:userId', getUserFiles);
-router.get('/preview/:fileId', getFilePreview);
 router.get('/preview/guest/:fileId', getGuestFilePreview);
+router.get('/preview/:fileId', getFilePreview);
 
 
 

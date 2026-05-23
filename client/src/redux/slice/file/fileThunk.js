@@ -58,14 +58,25 @@ export const generateShareShortenLink = createAsyncThunk("file/generateShortLink
 });
 
 // SEND LINK VIA EMAIL
-export const sendLinkEmail = createAsyncThunk("file/sendLinkEmail", async ({ fileId, email }, { rejectWithValue }) => {
-  try {
-    const res = await axiosInstance.post("/sendLinkEmail", { fileId, email });
-    return res.data;
-  } catch (err) {
-    return rejectWithValue(err.response?.data);
+export const sendLinkEmail = createAsyncThunk(
+  "file/sendLinkEmail",
+  async ({ fileId, email, isGuest = false }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/files/sendLinkEmail", {
+        fileId,
+        email,
+        isGuest,
+      });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to send email"
+      );
+    }
   }
-});
+);
 
 // UPDATE EXPIRY
 export const updateFileExpiry = createAsyncThunk("file/updateExpiry", async ({ fileId, expiresAt }, { rejectWithValue }) => {

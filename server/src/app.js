@@ -4,9 +4,13 @@ import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 import morgan from "morgan"
 import dotenv from "dotenv"
+import path from "path"
+import { fileURLToPath } from "url"
 
-// Load environment variables at app startup (only once here)
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Always load server/.env (cwd can differ when using nodemon)
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app=express();
 

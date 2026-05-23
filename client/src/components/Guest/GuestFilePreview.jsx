@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { formatDistanceToNowStrict, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 import ShareModal from "../common/ShareModal";
@@ -7,8 +6,7 @@ import FilePreviewModal from "../common/FilePreviewModal";
 import { Link } from "react-router-dom";
 import { FaEye, FaShare, FaTrashAlt } from "react-icons/fa";
 
-const GuestFilePreview = ({ guestFiles }) => {
-  const dispatch = useDispatch();
+const GuestFilePreview = ({ guestFiles, updateFiles }) => {
   const [files, setFiles] = useState(guestFiles || []);
   const [previewFile, setPreviewFile] = useState(null);
   const [shareFile, setShareFile] = useState(null);
@@ -31,18 +29,20 @@ const GuestFilePreview = ({ guestFiles }) => {
       return;
     }
 
-    const updatedFiles = files.filter(
-      (file) => (file._id || file.id) !== fileId
+    const id = String(fileId);
+    const current = Array.isArray(guestFiles) ? guestFiles : files;
+    const updatedFiles = current.filter(
+      (file) => String(file._id || file.id) !== id
     );
 
-    setFiles(updatedFiles);
-    localStorage.setItem("guestFiles", JSON.stringify(updatedFiles));
+    if (updateFiles) {
+      updateFiles(updatedFiles);
+    } else {
+      setFiles(updatedFiles);
+      localStorage.setItem("guestFiles", JSON.stringify(updatedFiles));
+    }
 
-    // Re-sync from localStorage (if that's your source of truth)
-    const refreshedFiles = JSON.parse(localStorage.getItem("guestFiles")) || [];
-    setFiles(refreshedFiles);
-
-    toast.success("File deleted successfully!");
+    toast.success("File removed from your list.");
   };
 
   useEffect(() => {
@@ -51,7 +51,11 @@ const GuestFilePreview = ({ guestFiles }) => {
 
 
 
-  const filteredFiles = files?.filter((file) => {
+  const safeFiles = Array.isArray(files) ? files : [];
+
+  const filteredFiles = safeFiles.filter((file) => {
+    if (!file?.name) return false;
+
     const nameMatch = file.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -77,7 +81,8 @@ const GuestFilePreview = ({ guestFiles }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-[var(--primary-text)] mb-4">📁 Your Uploaded Files</h2>
         <p className="text-sm text-[var(--primary-text)]">
-          Showing {filteredFiles.length} file{filteredFiles.length !== 1 && "s"}
+          Showing {filteredFiles?.length ?? 0} file
+          {filteredFiles?.length !== 1 && "s"}
         </p>
       </div>
 
@@ -100,7 +105,7 @@ const GuestFilePreview = ({ guestFiles }) => {
           onChange={(e) => setFilterType(e.target.value)}
         >
           <option value="">All Types</option>
-          {[...new Set(files?.map((f) => f.type))].map((type) => (
+          {[...new Set(safeFiles.map((f) => f.type).filter(Boolean))].map((type) => (
             <option key={type} value={type}>
               {type}
             </option>
@@ -131,7 +136,7 @@ const GuestFilePreview = ({ guestFiles }) => {
         )}
       </div>
 
-      {!files || files.length === 0 ? (
+      {safeFiles.length === 0 ? (
         <p className="text-gray-500">No files uploaded yet.</p>
       ) : (
         <div className="-my-2 overflow-x-auto">
@@ -162,7 +167,7 @@ const GuestFilePreview = ({ guestFiles }) => {
 
                 <tbody className="bg-[var(--bg-color)] divide-y divide-[var(--border-color)]">
                   {paginatedFiles?.map((file) => {
-                    const shareLinks = handleShare(file.shortUrl);
+                    const fileKey = file._id || file.id;
                     const formattedSize =
                       file.size > 1024 * 1024
                         ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
@@ -178,7 +183,7 @@ const GuestFilePreview = ({ guestFiles }) => {
                       <>
                         {/* Desktop Row */}
                         <tr
-                          key={file._id}
+                          key={fileKey}
                           className="hover:bg-[var(--hover-bg-color)] hidden md:table-row"
                         >
                           <td className="px-6 py-4 text-sm">
@@ -222,12 +227,11 @@ const GuestFilePreview = ({ guestFiles }) => {
 
                             {/* Delete */}
                             <button
-                              onClick={() => deleteFile(file.id)}
+                              onClick={() => deleteFile(fileKey)}
                               className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 border border-red-500 rounded hover:bg-red-50 transition"
                             >
                               <FaTrashAlt /> Delete
                             </button>
-                            <br />
                           </td>
                           <td className="px-6 py-4 text-sm text-red-500">
                             {isExpired
@@ -250,7 +254,7 @@ const GuestFilePreview = ({ guestFiles }) => {
 
                         {/* Mobile Card */}
                         <tr
-                          key={`mobile-${file._id}`}
+                          key={`mobile-${fileKey}`}
                           className="block md:hidden border-b border-gray-200"
                         >
                           <td className="block px-4 py-4">
@@ -315,7 +319,7 @@ const GuestFilePreview = ({ guestFiles }) => {
 
                             {/* Delete */}
                             <button
-                              onClick={() => deleteFile(file.id)}
+                              onClick={() => deleteFile(fileKey)}
                               className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 border border-red-500 rounded hover:bg-red-50 transition"
                             >
                               <FaTrashAlt /> Delete
@@ -386,7 +390,11 @@ const GuestFilePreview = ({ guestFiles }) => {
       )}
 
       {shareFile && (
-        <ShareModal file={shareFile} onClose={() => setShareFile(null)} />
+        <ShareModal
+          file={shareFile}
+          isGuest
+          onClose={() => setShareFile(null)}
+        />
       )}
     </div>
   );

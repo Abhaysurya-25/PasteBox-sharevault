@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { filesApiUrl } from "../../config/api";
+import axiosInstance from "../../config/axiosInstance";
 
 const FilePreviewModal = ({ file, onClose, isGuest = false }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -9,19 +9,32 @@ const FilePreviewModal = ({ file, onClose, isGuest = false }) => {
   useEffect(() => {
     if (!file) return;
 
+    const fileId = String(file._id || file.id || "").trim();
+    if (!fileId || fileId === "undefined") {
+      setError("File ID is missing. Try uploading again.");
+      setLoading(false);
+      return;
+    }
+
     const loadPreview = async () => {
       setLoading(true);
       setError("");
+      setPreviewUrl(null);
       try {
         const path = isGuest
-          ? `/preview/guest/${file._id || file.id}`
-          : `/preview/${file._id}`;
-        const res = await fetch(filesApiUrl(path));
-        if (!res.ok) throw new Error("Preview unavailable");
-        const data = await res.json();
-        setPreviewUrl(data.previewUrl);
-      } catch {
-        setError("Could not load preview. The file may be private or expired.");
+          ? `/files/preview/guest/${fileId}`
+          : `/files/preview/${fileId}`;
+        const res = await axiosInstance.get(path);
+        if (!res.data?.previewUrl) {
+          throw new Error("Preview URL not returned");
+        }
+        setPreviewUrl(res.data.previewUrl);
+      } catch (err) {
+        const msg =
+          err.response?.data?.error ||
+          err.message ||
+          "Could not load preview. The file may be private or expired.";
+        setError(msg);
       } finally {
         setLoading(false);
       }

@@ -2,7 +2,12 @@ import { File } from '../models/file.models.js';
 import { GuestFile } from '../models/guestFile.models.js';
 import { uploadToS3 } from "../config/s3-upload-helper.js";
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
+import {
+  createMailTransporter,
+  getFrontendBaseUrl,
+  getMailCredentials,
+  verifyMailTransporter,
+} from "../config/mail.js";
 import shortid from "shortid";
 import QRCode from "qrcode";
 import { User } from '../models/user.models.js';
@@ -175,6 +180,7 @@ const uploadFilesGuest = async (req, res) => {
             return res.status(201).json({
               message: "Files uploaded successfully",
               files: savedFiles.map(f => ({
+                _id: f._id,
                 id: f._id,
                 name: f.name,
                 size: f.size,
@@ -597,51 +603,92 @@ const generateShareShortenLink = async (req, res) => {
 }; 
 
 const sendLinkEmail = async (req, res) => {
-  const { fileId, email } = req.body;
+  const { fileId, email, isGuest } = req.body;
+
   try {
-    const file = await File.findById(fileId);
-    if (!file) return res.status(404).json({ error: 'File not found' });
+    if (!fileId || !email) {
+      return res.status(400).json({ error: "fileId and email are required" });
+    }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
-      }
-    });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email address" });
+    }
 
-   const mailOptions = {
-  from: `"File Share App" <${process.env.MAIL_USER}>`,
-  to: email,
-  subject: 'Your Shared File Link',
-  html: `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>📎 You've received a file!</h2>
-      <p>Hello,</p>
-      <p>You have been sent a file using <strong>File Share App</strong>.</p>
-      <p><strong>File Name:</strong> ${file.name}</p>
-      <p><strong>File Type:</strong> ${file.type}</p>
-      <p><strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
-      <p><strong>Download Link:</strong></p>
-      <p><a href="${file.path}" target="_blank" style="color: #3366cc;">Click here to download your file</a></p>
-      ${
-        file.expiresAt
-          ? `<p><strong>Note:</strong> This link will expire on <strong>${new Date(
-              file.expiresAt
-            ).toLocaleString()}</strong>.</p>`
-          : ''
-      }
-      <p>Thank you for using File Share App!</p>
-    </div>
-  `
-};
+    const file = isGuest
+      ? await GuestFile.findById(fileId)
+      : await File.findById(fileId);
 
+    if (!file) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    const transporter = createMailTransporter();
+
+    if (!transporter) {
+      return res.status(503).json({
+        error: "Email service not configured. Set MAIL_USER and MAIL_PASS in .env",
+      });
+    }
+
+    try {
+      await verifyMailTransporter(transporter);
+    } catch (verifyErr) {
+      console.error("Mail transporter verify failed:", verifyErr);
+      const { user } = getMailCredentials();
+      const placeholderHint = String(verifyErr.message || "").includes("placeholder");
+      return res.status(503).json({
+        error: placeholderHint
+          ? verifyErr.message
+          : "Gmail rejected the login. Use MAIL_USER = your full Gmail address and MAIL_PASS = a 16-character App Password from https://myaccount.google.com/apppasswords (not your normal Gmail password). Save server/.env and restart.",
+        detail: user ? `Configured sender: ${user}` : undefined,
+      });
+    }
+
+    const sharePath = normalizeShortPath(file.shortUrl);
+    const shareLink = `${getFrontendBaseUrl()}${sharePath}`;
+
+    const { user: mailFrom } = getMailCredentials();
+    const mailOptions = {
+      from: `"PasteBox" <${mailFrom}>`,
+      to: email,
+      subject: "A file was shared with you on PasteBox",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2>You have received a shared file</h2>
+          <p>Someone shared a file with you using <strong>PasteBox</strong>.</p>
+          <p><strong>File name:</strong> ${file.name}</p>
+          <p><strong>File type:</strong> ${file.type}</p>
+          <p><strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
+          <p><strong>Open &amp; download:</strong></p>
+          <p><a href="${shareLink}" target="_blank" style="color: #4f46e5;">${shareLink}</a></p>
+          ${
+            file.expiresAt
+              ? `<p><strong>Note:</strong> This link expires on ${new Date(
+                  file.expiresAt
+                ).toLocaleString()}.</p>`
+              : ""
+          }
+          <p>Thank you for using PasteBox.</p>
+        </div>
+      `,
+    };
 
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'Link sent successfully' });
+    return res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
-    console.error('Resend link error:', error);
-    res.status(500).json({ error: 'Error resending link' });
+    console.error("Send link email error:", error);
+    const code = error?.code || error?.responseCode;
+    const isAuthFailure =
+      code === "EAUTH" ||
+      String(error?.message || "").includes("535") ||
+      String(error?.response || "").includes("535");
+
+    return res.status(isAuthFailure ? 503 : 500).json({
+      error: isAuthFailure
+        ? "Gmail login failed. Regenerate an App Password and update MAIL_PASS in server .env."
+        : "Failed to send email. Please try again later.",
+    });
   }
 };
 
