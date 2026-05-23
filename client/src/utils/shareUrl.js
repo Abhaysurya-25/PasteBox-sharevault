@@ -20,7 +20,6 @@ export function getShareLinks(shortUrl) {
 
   return {
     whatsapp: `https://wa.me/?text=${text}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`,
     email: `mailto:?subject=${encodeURIComponent("Shared file on PasteBox")}&body=${encodeURIComponent(`Here's your file: ${fullUrl}`)}`,
     copy: fullUrl,
     qr: `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(fullUrl)}&size=200x200&margin=10`,

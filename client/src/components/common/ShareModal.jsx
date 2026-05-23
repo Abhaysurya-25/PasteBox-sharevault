@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   FaWhatsapp,
-  FaFacebook,
   FaEnvelope,
   FaDownload,
   FaLink,
@@ -16,7 +15,6 @@ import Modal from "../ui/Modal";
 
 const shareOptions = [
   { key: "whatsapp", label: "WhatsApp", icon: FaWhatsapp, color: "text-emerald-500", bg: "hover:bg-emerald-50 dark:hover:bg-emerald-500/10" },
-  { key: "facebook", label: "Facebook", icon: FaFacebook, color: "text-blue-600", bg: "hover:bg-blue-50 dark:hover:bg-blue-500/10" },
   { key: "email", label: "Email app", icon: FaEnvelope, color: "text-rose-500", bg: "hover:bg-rose-50 dark:hover:bg-rose-500/10", isMailto: true },
 ];
 
@@ -85,8 +83,8 @@ const ShareModal = ({ file, onClose, isGuest = false }) => {
   };
 
   return (
-    <Modal title={`Share "${displayName}"`} onClose={onClose} maxWidth="max-w-lg">
-      <div className="grid grid-cols-3 gap-3">
+    <Modal title="Share" subtitle={displayName} onClose={onClose} maxWidth="max-w-lg">
+      <div className="grid grid-cols-2 gap-3">
         {shareOptions.map(({ key, label, icon: Icon, color, bg, isMailto }) => (
           <a
             key={key}
@@ -101,7 +99,10 @@ const ShareModal = ({ file, onClose, isGuest = false }) => {
         ))}
       </div>
 
-      <div className="mt-6 rounded-xl border border-[var(--border-color)] bg-[var(--surface-muted)]/40 p-4">
+      <div
+        className="mt-6 rounded-xl border border-[var(--border-color)] p-4"
+        style={{ backgroundColor: "color-mix(in srgb, var(--surface-muted) 40%, transparent)" }}
+      >
         <p className="text-sm font-medium text-[var(--text-color)] mb-3">Send link by email</p>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
@@ -139,7 +140,10 @@ const ShareModal = ({ file, onClose, isGuest = false }) => {
         </div>
       </div>
 
-      <div className="mt-6 p-3 rounded-xl bg-[var(--surface-muted)]/50 border border-[var(--border-color)]">
+      <div
+        className="mt-6 p-3 rounded-xl border border-[var(--border-color)]"
+        style={{ backgroundColor: "color-mix(in srgb, var(--surface-muted) 50%, transparent)" }}
+      >
         <p className="text-xs text-[var(--secondary-text)] break-all font-mono">{links.copy}</p>
       </div>
     </Modal>

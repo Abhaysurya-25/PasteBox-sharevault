@@ -197,18 +197,20 @@
 }
 
 .remove-btn {
-  background-color: #ff4d4f;
+  background-color: #ef4444;
   border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: #ffffff;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .remove-btn:hover {
-  background-color: #e43e3e;
+  background-color: #dc2626;
+  color: #ffffff;
 }
 
 /* Upload Notification */
