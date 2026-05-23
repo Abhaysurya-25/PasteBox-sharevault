@@ -64,8 +64,7 @@ Copy `server/.env.sample` to `server/.env` and fill in:
 
 ```env
 PORT=6600
-MONGODB_URL=your_mongodb_connection_string
-CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 
 AWS_ACCESS_KEY_ID=your_key
@@ -79,8 +78,8 @@ MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_SECURE=false
 
-FRONTEND_URL=http://localhost:5173
-BASE_URL=http://localhost:6600
+FRONTEND_URL=https://your-vercel-app.vercel.app
+BASE_URL=https://your-vercel-app.vercel.app
 ```
 
 For Gmail, create an [App Password](https://myaccount.google.com/apppasswords) and use it as `MAIL_PASS`.
@@ -89,7 +88,7 @@ For Gmail, create an [App Password](https://myaccount.google.com/apppasswords) a
 
 ```env
 # client/.env
-VITE_API_BASE_URL=http://localhost:6600/api
+VITE_API_URL=https://your-render-api.example.com/api
 ```
 
 ### 4. Run locally
@@ -108,8 +107,8 @@ cd client
 npm run dev
 ```
 
-- App: http://localhost:5173  
-- API: http://localhost:6600  
+- App: (see `FRONTEND_URL`)  
+- API: (see `VITE_API_URL`)  
 
 ## Main routes
 

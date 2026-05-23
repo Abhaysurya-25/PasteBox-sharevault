@@ -1,43 +1,51 @@
 import { app } from "./app.js";
 import connectDB from "./db/index.js";
 import { logMailStartupStatus } from "./config/mail.js";
-import fileRoutes from "./routes/file.routes.js"
-import userRoutes from "./routes/user.routes.js"
-import path from 'path';
+import fileRoutes from "./routes/file.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import path from "path";
+import express from "express";
+
 const __dirname = path.resolve();
+const PORT = process.env.PORT || 5600;
+const frontendUrl =
+  process.env.FRONTEND_URL ||
+  process.env.CLIENT_URL ||
+  process.env.BASE_URL;
 
-import express from "express"
-import cors from "cors"
-const PORT=process.env.PORT || 5600;
+const redirectToFrontend = (res, route) => {
+  if (!frontendUrl) {
+    return res.status(500).json({
+      error: "Frontend URL is not configured. Set FRONTEND_URL or BASE_URL in server/.env.",
+    });
+  }
 
-      
+  return res.redirect(302, `${frontendUrl.replace(/\/$/, "")}${route}`);
+};
+
 const startServer = async () => {
-     try {
+  try {
     await connectDB();
 
-    // Register routes
     app.use("/api/files", fileRoutes);
-    app.use("/api/users", userRoutes); // 👈 Now you can use /api/users endpoints
-
-    app.use(express.static(path.join(__dirname, '/client')));
-
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    app.use("/api/users", userRoutes);
+    app.use(express.static(path.join(__dirname, "/client")));
 
     app.get("/f/:shortCode", (req, res) => {
-      res.redirect(302, `${frontendUrl}/f/${req.params.shortCode}`);
+      redirectToFrontend(res, `/f/${req.params.shortCode}`);
     });
 
     app.get("/g/:shortCode", (req, res) => {
-      res.redirect(302, `${frontendUrl}/g/${req.params.shortCode}`);
+      redirectToFrontend(res, `/g/${req.params.shortCode}`);
     });
 
     app.listen(PORT, () => {
-      console.log(`✅ Server is running at http://localhost:${PORT}`);
+      console.log(`✅ Server is running on port ${PORT}`);
       logMailStartupStatus();
     });
   } catch (error) {
     console.error("❌ Error starting server:", error);
   }
-  };
-  
-  startServer();
+};
+
+startServer();

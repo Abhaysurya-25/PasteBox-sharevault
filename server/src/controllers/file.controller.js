@@ -646,7 +646,15 @@ const sendLinkEmail = async (req, res) => {
     }
 
     const sharePath = normalizeShortPath(file.shortUrl);
-    const shareLink = `${getFrontendBaseUrl()}${sharePath}`;
+    const frontendBaseUrl = getFrontendBaseUrl();
+
+    if (!frontendBaseUrl || !sharePath) {
+      return res.status(500).json({
+        error: "Frontend URL is not configured. Set FRONTEND_URL or BASE_URL in server/.env.",
+      });
+    }
+
+    const shareLink = `${frontendBaseUrl}${sharePath}`;
 
     const { user: mailFrom } = getMailCredentials();
     const mailOptions = {
@@ -699,9 +707,16 @@ const generateQR = async (req, res) => {
     const file = await File.findById(fileId);
     if (!file) return res.status(404).json({ error: 'File not found' });
 
-    const fileUrl = file.path;
+    const frontendBaseUrl = getFrontendBaseUrl();
+    const sharePath = normalizeShortPath(file.shortUrl);
 
-    const qrDataUrl = await QRCode.toDataURL(fileUrl);
+    if (!frontendBaseUrl || !sharePath) {
+      return res.status(500).json({
+        error: "Frontend URL is not configured. Set FRONTEND_URL or BASE_URL in server/.env.",
+      });
+    }
+
+    const qrDataUrl = await QRCode.toDataURL(`${frontendBaseUrl}${sharePath}`);
 
     res.status(200).json({ qr: qrDataUrl });
   } catch (error) {

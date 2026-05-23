@@ -51,11 +51,14 @@ export async function verifyMailTransporter(transporter) {
 }
 
 export function getFrontendBaseUrl() {
-  return (
+  const candidate =
     process.env.FRONTEND_URL ||
     process.env.CLIENT_URL ||
-    "http://localhost:5173"
-  );
+    process.env.BASE_URL;
+
+  if (!candidate) return "";
+
+  return candidate.trim().replace(/\/$/, "");
 }
 
 export function logMailStartupStatus() {

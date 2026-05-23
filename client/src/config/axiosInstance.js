@@ -1,10 +1,22 @@
 import axios from "axios";
+import { API_BASE } from "./api";
 
-const BASE_URL="http://localhost:6600/api/"
-const axiosInstance=axios.create({
+const axiosInstance = axios.create({
+  baseURL: API_BASE,
   withCredentials: true,
-})
+});
 
-axiosInstance.defaults.baseURL=BASE_URL;
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message ||
+      "Network request failed";
+
+    return Promise.reject(new Error(message));
+  }
+);
 
 export default axiosInstance;
