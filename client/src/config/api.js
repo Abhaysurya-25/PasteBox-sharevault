@@ -1,6 +1,16 @@
+const DEFAULT_PRODUCTION_API_URL =
+  "https://pastebox-sharevault.onrender.com/api";
+
 const normalizeApiBase = (value) => {
   const raw = value?.trim();
-  if (!raw) return "/api";
+
+  if (!raw) {
+    return DEFAULT_PRODUCTION_API_URL;
+  }
+
+  if (raw.startsWith("/")) {
+    return raw.endsWith("/api") ? raw : `${raw.replace(/\/$/, "")}/api`;
+  }
 
   return raw.endsWith("/api") ? raw : `${raw.replace(/\/$/, "")}/api`;
 };
@@ -13,7 +23,11 @@ export const API_ROOT = API_BASE.replace(/\/api\/?$/, "");
 
 export const filesApiUrl = (path) => {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE}${normalized}`;
+  const filePath = normalized.startsWith("/files/") || normalized === "/files"
+    ? normalized
+    : `/files${normalized}`;
+
+  return `${API_BASE}${filePath}`;
 };
 
-export { API_BASE };
+export { API_BASE, DEFAULT_PRODUCTION_API_URL };

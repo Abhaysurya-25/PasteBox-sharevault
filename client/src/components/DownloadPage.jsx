@@ -22,7 +22,12 @@ const DownloadPage = () => {
       setError("");
       try {
         const res = await fetch(filesApiUrl(`/f/${shortCode}`), { signal: controller.signal });
-        if (!res.ok) throw new Error("File not found");
+
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || payload.message || `Request failed (${res.status})`);
+        }
+
         const data = await res.json();
         setFile(data);
         setIsProtected(data.isPasswordProtected);
